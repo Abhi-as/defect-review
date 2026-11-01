@@ -123,6 +123,7 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 .ic{display:none}
 .card.on .ic{display:inline-flex}
 .ic input{width:17px;height:17px;accent-color:var(--warn);cursor:pointer}
+.ic input:disabled{opacity:.4;cursor:not-allowed}
 .info{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;padding:14px 16px;font-size:13px}
 .info b{display:block;margin-bottom:5px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
 .chip{display:inline-block;margin:2px 4px 2px 0;padding:2px 9px;border-radius:999px;background:var(--blue-l);font-size:12px;color:#1e3a8a}
@@ -190,6 +191,7 @@ const safeUrl = u => (/^https?:\/\//i.test(u) ? u : '');
 const CREDIT = { name: 'Abhishek Sharma', contact: 'lshaabh', ver: 'v2.0' };
 const DL = 'https://share.amazon.com/sites/cpexaudits/Lists/CPEXAudits/EditForm.aspx?ID=';
 const KEY = 'defectReview.static.v2';
+const MAX_IMG = 4;   // image links allowed per disputed defect
 const MS = { mgr: 'Manager', assoc: 'Associate', date: 'Job Review Date', pkg: 'Package Type', week: 'Week' };
 const ORDER = Object.keys(MS);
 const SL = { all: 'All', un: 'Unreviewed', rev: 'Reviewed', dis: 'Disputed' };
@@ -334,7 +336,7 @@ function build(data) {
     };
   });
   const seen = {};
-  rows.forEach(r => { const s = state[r.id + '|' + r.assoc]; if (s && s.d) s.r = true; });   // older saved marks: disputed means reviewed
+  rows.forEach(r => { const s = state[r.id + '|' + r.assoc]; if (!s) return; if (s.d) s.r = true; if (s.i && s.i.length > MAX_IMG) s.i = s.i.slice().sort((a, b) => a - b).slice(0, MAX_IMG); });   // older saved marks: disputed means reviewed, at most MAX_IMG images
   rows.forEach(r => { const k = r.id + '|' + r.assoc; seen[k] = (seen[k] || 0) + 1; r.key = seen[k] > 1 ? k + '#' + seen[k] : k; });
   rows.forEach(r => r.kind = defectKind(r)); rcaG = rcaGroup();
   F = newF(); stat = 'all'; $('q').value = '';
@@ -391,11 +393,11 @@ function card(r) {
   const s = state[r.key] || {}, sel = new Set(s.i || []), n = r.imgs.length;
   let tags = isExp(r) ? '<span class="exp">Image links expired</span>' : '';
   const nav = `<div class="inav"><button type="button" class="ghost" data-nav="-1" aria-label="Previous image">&#8249;</button><span class="icur"${r.hidden ? ` title="${r.hidden} repeated or cropped link${r.hidden === 1 ? '' : 's'} hidden"` : ''}>${n} image${n === 1 ? '' : 's'}</span><button type="button" class="ghost" data-nav="1" aria-label="Next image">&#8250;</button></div>`;
-  const pills = r.imgs.map((m, i) => `<span class="ip"><label class="ic"><input type="checkbox" data-k="${m.k}"${sel.has(m.k) ? ' checked' : ''}></label><a href="${E(m.u)}" data-n="${i}" target="_blank" rel="noopener noreferrer">Image ${i + 1}</a></span>`).join('');
+  const pills = r.imgs.map((m, i) => { const lock = !sel.has(m.k) && sel.size >= MAX_IMG; return `<span class="ip"><label class="ic"${lock ? ` title="Maximum ${MAX_IMG} images per defect"` : ''}><input type="checkbox" data-k="${m.k}"${sel.has(m.k) ? ' checked' : ''}${lock ? ' disabled' : ''}></label><a href="${E(m.u)}" data-n="${i}" target="_blank" rel="noopener noreferrer">Image ${i + 1}</a></span>`; }).join('');
   return `<article class="card${s.d ? ' on' : ''}${s.r ? ' rev' : ''}" data-id="${E(r.key)}">
 <div class="ch"><div class="meta"><b>${E(r.asin || 'ASIN not found')}</b>${metaPills(r)}${tags}</div>
 <div class="acts"><label${s.d ? ' title="Marked for dispute, so it stays reviewed"' : ''}><input type="checkbox" class="cr"${s.r ? ' checked' : ''}${s.d ? ' disabled' : ''}> Reviewed</label><label class="dl"><input type="checkbox" class="cd"${s.d ? ' checked' : ''}> Mark for Dispute</label></div></div>
-<div class="db"${s.d ? '' : ' hidden'}><div class="dt"><button type="button" class="ghost" data-sa="1">Select all images</button><button type="button" class="ghost" data-sa="0">Clear images</button></div><textarea placeholder="Enter dispute comment (saved automatically)...">${E(s.c || '')}</textarea></div>
+<div class="db"${s.d ? '' : ' hidden'}><div class="dt"><button type="button" class="ghost" data-sa="1">Select first ${MAX_IMG} images</button><button type="button" class="ghost" data-sa="0">Clear images</button></div><textarea placeholder="Enter dispute comment (saved automatically)...">${E(s.c || '')}</textarea></div>
 <div class="imgs">${n ? nav + '<div class="ilist">' + pills + '</div>' : '<i>No images in this row</i>'}</div>
 <div class="info"><div><b>Associate response</b>${chips(r.resp, '')}</div><div><b>Auditor response</b>${chips(r.aud, '')}</div><div><b>Root cause</b>${rootHTML(r.root)}</div>
 <div class="lk">${r.retail ? `<a href="${E(r.retail)}" target="_blank" rel="noopener noreferrer">Retail page</a>` : ''}${r.id ? `<a href="${DL}${E(r.id)}" target="_blank" rel="noopener noreferrer">Dispute link</a>` : ''}</div></div></article>`;
@@ -428,7 +430,13 @@ function render() {
   rcaRender();
 }
 // image links the user ticked for one defect (in the order shown)
-const linksOf = (r, s) => (s.i || []).slice().sort((a, b) => a - b).map(k => (r.imgs.find(m => m.k === k) || {}).u).filter(Boolean);
+const linksOf = (r, s) => (s.i || []).slice().sort((a, b) => a - b).map(k => (r.imgs.find(m => m.k === k) || {}).u).filter(Boolean).slice(0, MAX_IMG);
+const pickedOf = c => [...c.querySelectorAll('.ic input:checked')].map(i => +i.dataset.k);
+// once MAX_IMG images are ticked the rest are locked until one is un-ticked
+function limitImgs(c) {
+  const full = c.querySelectorAll('.ic input:checked').length >= MAX_IMG;
+  c.querySelectorAll('.ic input').forEach(i => { const lock = full && !i.checked; i.disabled = lock; i.parentNode.title = lock ? 'Maximum ' + MAX_IMG + ' images per defect' : ''; });
+}
 function sumRender() {
   const d = rows.filter(r => isOn(r, 'd'));
   $('sum').hidden = !d.length; $('dc').textContent = d.length;
@@ -490,8 +498,8 @@ $('list').addEventListener('change', e => {
     const cr = c.querySelector('.cr');   // a disputed defect has been reviewed, so Reviewed stays ticked and locked
     if (el.checked) { s.r = true; c.classList.add('rev'); }
     cr.checked = !!s.r; cr.disabled = el.checked; cr.parentNode.title = el.checked ? 'Marked for dispute, so it stays reviewed' : '';
-    if (!el.checked) { s.i = []; s.c = ''; c.querySelectorAll('.ic input').forEach(i => i.checked = false); c.querySelector('textarea').value = ''; }
-  } else if (el.closest('.ic')) s.i = [...c.querySelectorAll('.ic input:checked')].map(i => +i.dataset.k);
+    if (!el.checked) { s.i = []; s.c = ''; c.querySelectorAll('.ic input').forEach(i => i.checked = false); limitImgs(c); c.querySelector('textarea').value = ''; }
+  } else if (el.closest('.ic')) { s.i = pickedOf(c); limitImgs(c); }
   persist(); sumRender(); stats(); statusBar();
   rcaRender();
 });
@@ -507,8 +515,8 @@ $('list').addEventListener('click', e => {
   else if (nb) openImg(c, curOf(c) + +nb.dataset.nav);
   else if (el.dataset.sa !== undefined) {
     const s = state[c.dataset.id] = state[c.dataset.id] || {};
-    c.querySelectorAll('.ic input').forEach(i => i.checked = el.dataset.sa === '1');
-    s.i = [...c.querySelectorAll('.ic input:checked')].map(i => +i.dataset.k); persist(); sumRender();
+    c.querySelectorAll('.ic input').forEach((i, n) => i.checked = el.dataset.sa === '1' && n < MAX_IMG);
+    s.i = pickedOf(c); limitImgs(c); persist(); sumRender();
   }
 });
 $('clear').addEventListener('click', () => { if (confirm('Clear all saved Reviewed / Dispute marks and comments?')) { state = {}; persist(); render(); sumRender(); } });
@@ -523,8 +531,7 @@ $('top').addEventListener('click', () => window.scrollTo({ top: 0 }));
 function copyX() {
   const d = rows.filter(r => isOn(r, 'd')); if (!d.length) return;
   const rdOf = r => r.recv || usDate($('rd').value);
-  let mx = 4; d.forEach(r => mx = Math.max(mx, linksOf(r, state[r.key]).length));
-  const hd = ['Email Received Date', 'Associate ID', 'ASIN']; for (let k = 1; k <= mx; k++) hd.push('Link' + k);
+  const hd = ['Email Received Date', 'Associate ID']; for (let k = 1; k <= MAX_IMG; k++) hd.push('Link' + k);
   hd.push('Job Review Date', 'ASIN Link', 'Dispute Link', 'Dispute Comment');
   const q = String.fromCharCode(39), cs = 'border:1px solid #999999;padding:2px;', td = '<td style=' + q + cs + q + '>', th = '<th style=' + q + cs + 'background:#e0e0e0;' + q + '>';
   const attr = u => String(u).replace(/&/g, '&amp;').replace(/'/g, '%27').replace(/</g, '%3C').replace(/>/g, '%3E');
@@ -532,9 +539,9 @@ function copyX() {
   const cell = v => td + E(val(v)) + '</td>', lc = (u, l) => (u ? td + '<a href=' + q + attr(u) + q + '>' + l + '</a></td>' : td + '</td>');
   let html = '<table><tr>' + hd.map(h => th + h + '</th>').join('') + '</tr>', text = hd.join('\t') + '\n';
   d.forEach(r => {
-    const s = state[r.key], links = linksOf(r, s), dl = r.id ? DL + r.id : '', rd = rdOf(r), row = [clean(rd), clean(r.assoc), clean(r.asin)];
-    html += '<tr>' + cell(rd) + cell(r.assoc) + cell(r.asin);
-    for (let i = 0; i < mx; i++) { html += lc(links[i], 'image ' + (i + 1)); row.push(links[i] || ''); }
+    const s = state[r.key], links = linksOf(r, s), dl = r.id ? DL + r.id : '', rd = rdOf(r), login = (r.assoc || '').toLowerCase(), row = [clean(rd), clean(login)];
+    html += '<tr>' + cell(rd) + cell(login);
+    for (let i = 0; i < MAX_IMG; i++) { html += lc(links[i], 'image ' + (i + 1)); row.push(links[i] || ''); }
     html += cell(r.date) + lc(r.retail, 'asin_link') + lc(dl, 'Dispute_link') + cell(s.c) + '</tr>';
     row.push(clean(r.date), clean(r.retail), clean(dl), clean(s.c)); text += row.join('\t') + '\n';
   });
