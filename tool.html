@@ -31,6 +31,13 @@ input[type=text],input[type=date],select{font:inherit;padding:7px 10px;border:1p
 .intro h2{margin:0 0 8px;font-size:20px;font-weight:600;color:var(--ink)}
 #pager{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0}
 #pager button{min-width:100px}
+#rca{margin-bottom:12px;padding:12px 16px;border:2px solid var(--ok);border-radius:12px;background:var(--ok-l)}
+#rca .sh{color:var(--ok)}
+#rpend{font-size:13px;color:var(--mut)}
+#rok{display:none;font-weight:600;color:var(--ok)}
+#rlist{display:grid;gap:10px;max-height:380px;margin-top:10px;overflow:auto}
+.rg{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #c8e6c9;border-radius:8px;background:#fff}
+.rg pre{margin:0;font:13px/1.6 Consolas,'Segoe UI',monospace;white-space:pre-wrap}
 .fl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;position:sticky;top:0;z-index:30;padding:9px 12px;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .ms{position:relative}
 .ms>summary{list-style:none;cursor:pointer;padding:7px 12px;border:1px solid #c5d2de;border-radius:8px;background:#fff;white-space:nowrap}
@@ -144,6 +151,10 @@ footer{padding:20px;text-align:center;font-size:12px;color:#78909c}
     <button id="copy">Copy to Clipboard (Excel Format)</button><span id="ok">Copied!</span><button class="ghost" id="stg">Show list</button></div>
   <div id="slist" hidden></div>
 </div>
+<div id="rca" hidden>
+  <div class="sh"><b>RCA ready (<span id="rn">0</span>)</b><span id="rpend"></span><span class="sp"></span><span id="rok">Copied!</span><button id="rcopy">Copy all RCA</button><button class="ghost" id="rtg">Hide</button></div>
+  <div id="rlist"></div>
+</div>
 <div id="stats"></div>
 <div id="prog"><i></i></div>
 <div id="list"></div>
@@ -239,6 +250,47 @@ async function loadFile(f) {
   }
 }
 
+/* ---------- RCA: one report per login and review date, ready when every defect of it is reviewed ---------- */
+const VP_ATTRS = ['VARIABLE_PACKAGING'];   // attributes that make a defect a "Variable Packaging" defect
+let rcaG = [], rcaShown = [];
+// 'vp' = has a variable packaging attribute, 'pm' = package material is the ONLY wrong attribute, else 'other'
+function defectKind(r) {
+  const names = new Set();
+  r.root.split('||').forEach(p => {
+    const m = p.match(/^\s*(?:INCORRECT|MISSED) ATTRIBUTE:(.*)$/i);
+    if (m) m[1].split(',').forEach(a => { if (a.includes(':')) names.add(a.split(':')[0].trim().toUpperCase()); });
+  });
+  if (VP_ATTRS.some(a => names.has(a))) return 'vp';
+  return names.size === 1 && names.has('PACKAGE_MATERIAL') ? 'pm' : 'other';
+}
+function rcaGroup() {
+  const g = new Map();
+  rows.forEach(r => { const k = r.assoc + '|' + r.date; if (!g.has(k)) g.set(k, { key: k, login: r.assoc, date: r.date, rows: [] }); g.get(k).rows.push(r); });
+  return [...g.values()];
+}
+function rcaText(x) {
+  const n = k => x.rows.filter(r => r.kind === k).length, dk = k => x.rows.filter(r => isOn(r, 'd') && r.kind === k).length;
+  const dis = dk('vp') + dk('pm') + dk('other');
+  return ['Login : ' + (x.login || 'N/A').toLowerCase(), 'Date : ' + (x.date || 'N/A'), 'Total Defects Received : ' + x.rows.length,
+    'Variable Packaging : ' + n('vp'), 'Package Material : ' + n('pm'),
+    'Updated for Dispute Review : ' + dis + ' (' + dk('vp') + ' VP, ' + dk('pm') + ' Package material, ' + dk('other') + ' Other)',
+    'Simple Misses : ' + (x.rows.length - dis)].join('\n');
+}
+function rcaRender() {
+  const vis = new Set(rows.filter(r => match(r, null, true)).map(r => r.assoc + '|' + r.date));
+  const list = rcaG.filter(x => vis.has(x.key));
+  rcaShown = list.filter(x => x.rows.every(r => isOn(r, 'r')));
+  $('rca').hidden = !rcaShown.length;
+  $('rn').textContent = rcaShown.length;
+  $('rpend').textContent = list.length > rcaShown.length ? (list.length - rcaShown.length) + ' more still being reviewed' : '';
+  $('rlist').innerHTML = rcaShown.map((x, i) => `<div class="rg"><pre>${E(rcaText(x))}</pre><button class="ghost" data-rc="${i}">Copy</button></div>`).join('');
+}
+function copyText(t) {
+  const done = () => { $('rok').style.display = 'inline'; setTimeout(() => $('rok').style.display = 'none', 2500); };
+  const fb = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(fb); else fb();
+}
+
 /* ---------- rows ---------- */
 const base = u => u.replace(/\?X-Amz.*$/, '');
 const orig = u => base(u).replace('crop_rgb_image', 'raw_rgb_image').replace('/cropped/', '/');
@@ -265,6 +317,7 @@ function build(data) {
   });
   const seen = {};
   rows.forEach(r => { const k = r.id + '|' + r.assoc; seen[k] = (seen[k] || 0) + 1; r.key = seen[k] > 1 ? k + '#' + seen[k] : k; });
+  rows.forEach(r => r.kind = defectKind(r)); rcaG = rcaGroup();
   F = newF(); stat = 'all'; $('q').value = '';
   page = 0;
   $('msbox').innerHTML = ORDER.map(k => `<details class="ms" data-k="${k}"><summary>${MS[k]}: <i>All</i></summary><div class="pn"><input type="text" class="sq" placeholder="Search ${MS[k].toLowerCase()}..."><div class="pb"><button type="button" class="ghost" data-all="1">Select shown</button><button type="button" class="ghost" data-clr="1">Clear</button></div><div class="ol"></div></div></details>`).join('');
@@ -353,6 +406,7 @@ function render() {
   const ch = []; ORDER.forEach(k => F[k].forEach(v => ch.push(`<span class="fc">${MS[k]}: ${E(v)}<button data-k="${k}" data-v="${E(v)}">&times;</button></span>`)));
   $('chips').innerHTML = ch.length ? ch.join('') + '<button class="ghost" data-all="1">Clear all filters</button>' : '';
   stats(f);
+  rcaRender();
 }
 // image links the user ticked for one defect (in the order shown)
 const linksOf = (r, s) => (s.i || []).slice().sort((a, b) => a - b).map(k => (r.imgs.find(m => m.k === k) || {}).u).filter(Boolean);
@@ -406,6 +460,9 @@ $('q').addEventListener('input', render);
 $('sort').addEventListener('change', render);
 $('psize').addEventListener('change', () => { page = 0; render(); });
 $('pager').addEventListener('click', e => { if (e.target.dataset.p) { page += +e.target.dataset.p; render(); $('stats').scrollIntoView(); } });
+$('rlist').addEventListener('click', e => { const b = e.target.closest('[data-rc]'); if (b) copyText(rcaText(rcaShown[+b.dataset.rc])); });
+$('rcopy').addEventListener('click', () => copyText(rcaShown.map(rcaText).join('\n\n')));
+$('rtg').addEventListener('click', () => { const h = $('rlist').hidden = !$('rlist').hidden; $('rtg').textContent = h ? 'Show' : 'Hide'; });
 $('file').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
 ['dragover', 'drop'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); if (n === 'drop') loadFile(e.dataTransfer.files[0]); }));
 $('list').addEventListener('change', e => {
@@ -418,6 +475,7 @@ $('list').addEventListener('change', e => {
     if (!el.checked) { s.i = []; s.c = ''; c.querySelectorAll('.ic input').forEach(i => i.checked = false); c.querySelector('textarea').value = ''; }
   } else if (el.closest('.ic')) s.i = [...c.querySelectorAll('.ic input:checked')].map(i => +i.dataset.k);
   persist(); sumRender(); stats(); statusBar();
+  rcaRender();
 });
 $('list').addEventListener('input', e => {
   if (e.target.tagName !== 'TEXTAREA') return;
