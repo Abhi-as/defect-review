@@ -26,6 +26,7 @@ button.ghost:hover{background:var(--blue-l);box-shadow:none}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 input[type=text],input[type=date],select{padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font:inherit;color:var(--ink);transition:border-color .15s,box-shadow .15s}
 input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(33,96,214,.15)}
+select{appearance:none;-webkit-appearance:none;padding-right:32px;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%277%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 fill=%27none%27 stroke=%27%2364748b%27 stroke-width=%272%27/%3E%3C/svg%3E') no-repeat right 12px center;cursor:pointer}
 .panel{margin-bottom:12px;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--sh1)}
 .bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 #msg{font-weight:600;color:var(--ok)}
@@ -51,8 +52,8 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 .ol label{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;cursor:pointer}
 .ol label:hover{background:var(--blue-l)}
 .ol label span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ol em,.seg em{font-style:normal;font-size:12px;color:#94a3b8}
-.none{margin:6px;color:#94a3b8}
+.ol em,.seg em{font-style:normal;font-size:12px;color:#64748b}
+.none{margin:6px;color:#64748b}
 .seg{display:flex;margin-left:auto;border:1px solid #cbd5e1;border-radius:10px;background:#fff;overflow:hidden}
 .seg button{padding:7px 14px;border-right:1px solid var(--line);border-radius:0;background:#fff;color:#475569;box-shadow:none}
 .seg button:last-child{border-right:0}
@@ -83,7 +84,7 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 #stats{margin:8px 4px 6px;font-size:13px;font-weight:500;color:var(--mut)}
 #prog{height:6px;margin:0 2px 16px;border-radius:99px;background:#dbe4ef;overflow:hidden}
 #prog i{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,var(--ok));transition:width .3s}
-.empty{padding:48px;text-align:center;color:#94a3b8}
+.empty{padding:48px;text-align:center;color:#64748b}
 .card{margin-bottom:16px;border:1px solid var(--line);border-left:5px solid #cbd5e1;border-radius:14px;background:#fff;box-shadow:var(--sh1);overflow:hidden;animation:rise .22s ease both;transition:box-shadow .2s}
 .card:hover{box-shadow:var(--sh2)}
 .card.rev{border-left-color:var(--ok)}
@@ -98,7 +99,7 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 .meta .warn{background:var(--warn-l);color:var(--warn);font-weight:600}
 .acts{display:flex;gap:8px}
 .acts label{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid #d5dde8;border-radius:999px;background:#fff;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-.acts label:hover{border-color:#94a3b8}
+.acts label:hover{border-color:#64748b}
 .acts .dl{color:var(--warn)}
 .acts label:has(.cr:checked){border-color:#86d3a0;background:var(--ok-l);color:var(--ok)}
 .acts label:has(.cd:checked){border-color:#f5b36b;background:var(--warn-l);color:var(--warn)}
@@ -113,7 +114,7 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 .imgs{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 16px;border-bottom:1px solid var(--line);background:#f8fafc}
 .inav{display:flex;align-items:center;gap:6px}
 .inav button{width:30px;height:30px;padding:0;border-radius:50%;font-size:18px;line-height:1}
-.icur{min-width:100px;text-align:center;font-size:13px;font-weight:600;color:#475569}
+.icur{min-width:120px;text-align:center;font-size:13px;font-weight:600;color:#475569}
 .ilist{display:flex;flex-wrap:wrap;gap:6px}
 .ip{display:inline-flex;align-items:center;gap:6px;padding:3px 14px 3px 12px;border:1px solid #d5dde8;border-radius:999px;background:#fff;transition:border-color .15s,background .15s}
 .ip:hover{border-color:var(--blue)}
@@ -137,7 +138,7 @@ input[type=text]:focus,input[type=date]:focus,select:focus{outline:0;border-colo
 #vbar #vx{padding:3px 10px 5px;font-size:18px}
 #vt{min-width:150px;text-align:center;font-size:13px;font-weight:600}
 #top{position:fixed;right:18px;bottom:18px;z-index:40;width:42px;height:42px;padding:0;border-radius:50%;font-size:20px;box-shadow:0 6px 16px rgba(15,34,55,.3)}
-footer{padding:24px;text-align:center;font-size:12px;color:#94a3b8}
+footer{padding:24px;text-align:center;font-size:12px;color:#64748b}
 @media(max-width:700px){.seg{margin-left:0}.info{grid-template-columns:1fr}header{padding:12px 16px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 </style>
@@ -327,11 +328,11 @@ function build(data) {
   const ic = hd.map((h, i) => [h, i]).filter(a => /^url[_ ]?\d+$/i.test(a[0])).sort((a, b) => a[0].replace(/\D/g, '') - b[0].replace(/\D/g, '')).map(a => a[1]);
   const g = (r, k) => H[k] !== undefined && r[H[k]] != null ? String(r[H[k]]).trim() : '';
   rows = data.slice(1).filter(r => r && (g(r, 'id') || g(r, 'asin'))).map(r => {
-    const all = ic.map((c, k) => ({ k, u: r[c] ? String(r[c]).trim() : '' })).filter(m => safeUrl(m.u)), imgs = usefulImages(all);
+    const all = ic.map((c, k) => ({ k, n: +((hd[c].match(/\d+/) || [k + 1])[0]), u: r[c] ? String(r[c]).trim() : '' })).filter(m => safeUrl(m.u)), imgs = usefulImages(all);
     return {
       id: g(r, 'id'), asin: g(r, 'asin'), pkg: g(r, 'package type'), week: g(r, 'week'), assoc: g(r, 'associate 1'),
       date: g(r, 'job review date'), mgr: g(r, 'manager'), resp: g(r, 'decision_reason_code_1'), aud: g(r, 'auditor reason code'),
-      root: g(r, 'root cause 1'), exp: g(r, 'url_expiry_date'), recv: g(r, 'email received date'), imgs, hidden: all.length - imgs.length,
+      root: g(r, 'root cause 1'), exp: g(r, 'url_expiry_date'), recv: g(r, 'email received date'), imgs, hidden: all.filter(m => !imgs.includes(m)).map(m => m.n),
       retail: safeUrl(g(r, 'retail page url')) || (g(r, 'asin') ? 'http://www.amazon.com/dp/' + g(r, 'asin') : '')
     };
   });
@@ -392,13 +393,13 @@ function metaPills(r) {
 function card(r) {
   const s = state[r.key] || {}, sel = new Set(s.i || []), n = r.imgs.length;
   let tags = isExp(r) ? '<span class="exp">Image links expired</span>' : '';
-  const nav = `<div class="inav"><button type="button" class="ghost" data-nav="-1" aria-label="Previous image">&#8249;</button><span class="icur"${r.hidden ? ` title="${r.hidden} repeated or cropped link${r.hidden === 1 ? '' : 's'} hidden"` : ''}>${n} image${n === 1 ? '' : 's'}</span><button type="button" class="ghost" data-nav="1" aria-label="Next image">&#8250;</button></div>`;
-  const pills = r.imgs.map((m, i) => { const lock = !sel.has(m.k) && sel.size >= MAX_IMG; return `<span class="ip"><label class="ic"${lock ? ` title="Maximum ${MAX_IMG} images per defect"` : ''}><input type="checkbox" data-k="${m.k}"${sel.has(m.k) ? ' checked' : ''}${lock ? ' disabled' : ''}></label><a href="${E(m.u)}" data-n="${i}" target="_blank" rel="noopener noreferrer">Image ${i + 1}</a></span>`; }).join('');
+  const nav = `<div class="inav"><button type="button" class="ghost" data-nav="-1" aria-label="Previous image">&#8249;</button><span class="icur"${r.hidden.length ? ` title="Hidden (repeated or cropped): ${r.hidden.map(x => 'URL ' + x).join(', ')}"` : ''}>${n} URL${n === 1 ? '' : 's'}</span><button type="button" class="ghost" data-nav="1" aria-label="Next image">&#8250;</button></div>`;
+  const pills = r.imgs.map((m, i) => { const lock = !sel.has(m.k) && sel.size >= MAX_IMG; return `<span class="ip"><label class="ic"${lock ? ` title="Maximum ${MAX_IMG} URLs per defect"` : ''}><input type="checkbox" data-k="${m.k}"${sel.has(m.k) ? ' checked' : ''}${lock ? ' disabled' : ''}></label><a href="${E(m.u)}" data-n="${i}" target="_blank" rel="noopener noreferrer">URL ${m.n}</a></span>`; }).join('');
   return `<article class="card${s.d ? ' on' : ''}${s.r ? ' rev' : ''}" data-id="${E(r.key)}">
 <div class="ch"><div class="meta"><b>${E(r.asin || 'ASIN not found')}</b>${metaPills(r)}${tags}</div>
 <div class="acts"><label${s.d ? ' title="Marked for dispute, so it stays reviewed"' : ''}><input type="checkbox" class="cr"${s.r ? ' checked' : ''}${s.d ? ' disabled' : ''}> Reviewed</label><label class="dl"><input type="checkbox" class="cd"${s.d ? ' checked' : ''}> Mark for Dispute</label></div></div>
-<div class="db"${s.d ? '' : ' hidden'}><div class="dt"><button type="button" class="ghost" data-sa="1">Select first ${MAX_IMG} images</button><button type="button" class="ghost" data-sa="0">Clear images</button></div><textarea placeholder="Enter dispute comment (saved automatically)...">${E(s.c || '')}</textarea></div>
-<div class="imgs">${n ? nav + '<div class="ilist">' + pills + '</div>' : '<i>No images in this row</i>'}</div>
+<div class="db"${s.d ? '' : ' hidden'}><div class="dt"><button type="button" class="ghost" data-sa="1">Select first ${MAX_IMG} URLs</button><button type="button" class="ghost" data-sa="0">Clear URLs</button></div><textarea placeholder="Dispute comment, e.g. from URL 4 we can see that... (saved automatically)">${E(s.c || '')}</textarea></div>
+<div class="imgs">${n ? nav + '<div class="ilist">' + pills + '</div>' : '<i>No URLs in this row</i>'}</div>
 <div class="info"><div><b>Associate response</b>${chips(r.resp, '')}</div><div><b>Auditor response</b>${chips(r.aud, '')}</div><div><b>Root cause</b>${rootHTML(r.root)}</div>
 <div class="lk">${r.retail ? `<a href="${E(r.retail)}" target="_blank" rel="noopener noreferrer">Retail page</a>` : ''}${r.id ? `<a href="${DL}${E(r.id)}" target="_blank" rel="noopener noreferrer">Dispute link</a>` : ''}</div></div></article>`;
 }
@@ -430,17 +431,17 @@ function render() {
   rcaRender();
 }
 // image links the user ticked for one defect (in the order shown)
-const linksOf = (r, s) => (s.i || []).slice().sort((a, b) => a - b).map(k => (r.imgs.find(m => m.k === k) || {}).u).filter(Boolean).slice(0, MAX_IMG);
+const linksOf = (r, s) => (s.i || []).slice().sort((a, b) => a - b).map(k => r.imgs.find(m => m.k === k)).filter(Boolean).slice(0, MAX_IMG);
 const pickedOf = c => [...c.querySelectorAll('.ic input:checked')].map(i => +i.dataset.k);
 // once MAX_IMG images are ticked the rest are locked until one is un-ticked
 function limitImgs(c) {
   const full = c.querySelectorAll('.ic input:checked').length >= MAX_IMG;
-  c.querySelectorAll('.ic input').forEach(i => { const lock = full && !i.checked; i.disabled = lock; i.parentNode.title = lock ? 'Maximum ' + MAX_IMG + ' images per defect' : ''; });
+  c.querySelectorAll('.ic input').forEach(i => { const lock = full && !i.checked; i.disabled = lock; i.parentNode.title = lock ? 'Maximum ' + MAX_IMG + ' URLs per defect' : ''; });
 }
 function sumRender() {
   const d = rows.filter(r => isOn(r, 'd'));
   $('sum').hidden = !d.length; $('dc').textContent = d.length;
-  $('slist').innerHTML = d.map(r => { const s = state[r.key], n = linksOf(r, s).length; return `<div class="si"><b>${E(r.asin)}</b> | ${E(r.assoc)} | ${n} image link${n === 1 ? '' : 's'} | ${E(s.c || '(no comment yet)')}</div>`; }).join('');
+  $('slist').innerHTML = d.map(r => { const s = state[r.key], L = linksOf(r, s); return `<div class="si"><b>${E(r.asin)}</b> | ${E(r.assoc)} | ${L.length ? 'URL ' + L.map(m => m.n).join(', ') : 'no URL selected'} | ${E(s.c || '(no comment yet)')}</div>`; }).join('');
 }
 
 /* ---------- image window + arrows ---------- */
@@ -449,7 +450,7 @@ function openImg(c, n) {
   const links = [...c.querySelectorAll('.ilist a')]; if (!links.length) return false;
   n = (n + links.length) % links.length; activeCard = c; c.dataset.cur = n;
   c.querySelectorAll('.ip').forEach((p, i) => p.classList.toggle('cur', i === n));
-  const txt = 'Image ' + (n + 1) + ' of ' + links.length;
+  const txt = links[n].textContent + ' (' + (n + 1) + ' of ' + links.length + ')';
   c.querySelector('.icur').textContent = txt;
   $('vt').textContent = c.querySelector('.meta b').textContent + '  |  ' + txt; $('vbar').hidden = false;
   const W = Math.round(screen.availWidth * 0.5), L = (screen.availLeft || 0) + screen.availWidth - W;
@@ -468,23 +469,23 @@ document.addEventListener('keydown', e => {
 /* ---------- events ---------- */
 $('msbox').addEventListener('change', e => {
   const d = e.target.closest('.ms'); if (!d || e.target.classList.contains('sq')) return;
-  const k = d.dataset.k; e.target.checked ? F[k].add(e.target.value) : F[k].delete(e.target.value); render();
+  const k = d.dataset.k; e.target.checked ? F[k].add(e.target.value) : F[k].delete(e.target.value); page = 0; render();
 });
 $('msbox').addEventListener('input', e => { if (e.target.classList.contains('sq')) fillMS(e.target.closest('.ms').dataset.k); });
 $('msbox').addEventListener('click', e => {
   const d = e.target.closest('.ms'); if (!d) return; const k = d.dataset.k;
-  if (e.target.dataset.clr) { F[k].clear(); render(); }
-  else if (e.target.dataset.all) { d.querySelectorAll('.ol input').forEach(i => F[k].add(i.value)); render(); }
+  if (e.target.dataset.clr) { F[k].clear(); page = 0; render(); }
+  else if (e.target.dataset.all) { d.querySelectorAll('.ol input').forEach(i => F[k].add(i.value)); page = 0; render(); }
 });
 document.addEventListener('click', e => document.querySelectorAll('.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
-$('status').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { stat = b.dataset.s; render(); } });
+$('status').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { stat = b.dataset.s; page = 0; render(); } });
 $('chips').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.all) { F = newF(); $('q').value = ''; stat = 'all'; } else F[b.dataset.k].delete(b.dataset.v);
+  page = 0; if (b.dataset.all) { F = newF(); $('q').value = ''; stat = 'all'; } else F[b.dataset.k].delete(b.dataset.v);
   render();
 });
-$('q').addEventListener('input', render);
-$('sort').addEventListener('change', render);
+$('q').addEventListener('input', () => { page = 0; render(); });
+$('sort').addEventListener('change', () => { page = 0; render(); });
 $('psize').addEventListener('change', () => { page = 0; render(); });
 $('pager').addEventListener('click', e => { if (e.target.dataset.p) { page += +e.target.dataset.p; render(); $('stats').scrollIntoView(); } });
 $('file').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
@@ -541,13 +542,13 @@ function copyX() {
   d.forEach(r => {
     const s = state[r.key], links = linksOf(r, s), dl = r.id ? DL + r.id : '', rd = rdOf(r), login = (r.assoc || '').toLowerCase(), row = [clean(rd), clean(login)];
     html += '<tr>' + cell(rd) + cell(login);
-    for (let i = 0; i < MAX_IMG; i++) { html += lc(links[i], 'image ' + (i + 1)); row.push(links[i] || ''); }
+    for (let i = 0; i < MAX_IMG; i++) { html += lc(links[i] && links[i].u, 'url ' + (links[i] ? links[i].n : i + 1)); row.push(links[i] ? links[i].u : ''); }
     html += cell(r.date) + lc(r.retail, 'asin_link') + lc(dl, 'Dispute_link') + cell(s.c) + '</tr>';
     row.push(clean(r.date), clean(r.retail), clean(dl), clean(s.c)); text += row.join('\t') + '\n';
   });
   html += '</table>';
   const noC = d.filter(r => !(state[r.key].c || '').trim()).length, noI = d.filter(r => !linksOf(r, state[r.key]).length).length;
-  const note = [noC && noC + ' without a comment', noI && noI + ' without an image link'].filter(Boolean).join(', ');
+  const note = [noC && noC + ' without a comment', noI && noI + ' without a URL'].filter(Boolean).join(', ');
   const done = () => {
     $('ok').textContent = note ? 'Copied. Note: ' + note : 'Copied!'; $('ok').style.color = note ? 'var(--warn)' : '';
     $('ok').style.display = 'inline'; setTimeout(() => $('ok').style.display = 'none', note ? 6000 : 3000);
